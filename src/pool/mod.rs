@@ -36,7 +36,7 @@ pub enum Event {
         func: Box<FnBox(&Service, Settings) -> Box<Future<Item = (), Error = ()> + Send> + Send>,
     },
     OnServiceConnect(Service),
-    OnRoutingUpdates(HashMap<String, HashRing>),
+    OnRoutingUpdates(Vec<String>),
     OnTracingUpdates(HashMap<String, f64>),
     OnTimeoutUpdates(HashMap<String, f64>),
 }
@@ -328,7 +328,7 @@ impl Future for PoolTask {
                             }
                         }
                         Event::OnRoutingUpdates(groups) => {
-                            for (group, ..) in groups {
+                            for group in groups {
                                 if let Some(pool) = self.pool.get_mut(&group) {
                                     cocaine_log!(self.log, Severity::Info, "updated `{}` pool", group);
                                     pool.reconnect_all();
@@ -384,6 +384,7 @@ impl Action for RoutingGroupsAction {
             log: self.log.clone(),
             uuid: uuid,
             stream: box stream,
+            current_groups: HashMap::new(),
         }
     }
 }
@@ -393,6 +394,7 @@ pub struct RoutingGroupsUpdateTask {
     log: Logger,
     uuid: String,
     stream: Box<Stream<Item=HashMap<String, HashRing>, Error=Error>>,
+    current_groups: HashMap<String, HashRing>,
 }
 
 impl Future for RoutingGroupsUpdateTask {
@@ -403,11 +405,33 @@ impl Future for RoutingGroupsUpdateTask {
         loop {
             match self.stream.poll() {
                 Ok(Async::Ready(Some(groups))) => {
-                    cocaine_log!(self.log, Severity::Info, "received {} RG(s) updates", groups.len(); {
-                        uuid: self.uuid,
-                    });
+                    let mut updated_groups = Vec::with_capacity(
+                        self.current_groups.len() + groups.len());
 
-                    self.dispatcher.send_all(|| Event::OnRoutingUpdates(groups.clone()));
+                    for (key, current_ring) in self.current_groups.iter() {
+                        if let Some(new_ring) = groups.get(key) {
+                            if current_ring == new_ring {
+                                continue;
+                            }
+                        }
+
+                        updated_groups.push(key.clone());
+                    }
+
+                    for key in groups.keys() {
+                        if !self.current_groups.contains_key(key) {
+                            updated_groups.push(key.clone());
+                        }
+                    }
+
+                    cocaine_log!(self.log, Severity::Info, "received {}/{} RG(s) updates",
+                        updated_groups.len(), groups.len(); {
+                            uuid: self.uuid,
+                        });
+
+                    self.current_groups = groups.clone();
+
+                    self.dispatcher.send_all(|| Event::OnRoutingUpdates(updated_groups.clone()));
                 }
                 Ok(Async::NotReady) => return Ok(Async::NotReady),
                 Ok(Async::Ready(None)) => {
