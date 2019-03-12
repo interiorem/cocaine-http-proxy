@@ -1,3 +1,9 @@
+cocaine-http-proxy (0.3.23) unstable; urgency=medium
+
+  * refact: update tokio-core version
+
+ -- Boris Litvinenko <borislitv@yandex-team.ru>  Tue, 12 Mar 2019 16:02:04 +0300
+
 cocaine-http-proxy (0.3.22) unstable; urgency=medium
 
   * fix: update hyper(send 400 responses on parse errors before closing connection)
