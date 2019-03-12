@@ -1,3 +1,9 @@
+cocaine-http-proxy (0.3.22) unstable; urgency=medium
+
+  * fix: update hyper(send 400 responses on parse errors before closing connection)
+
+ -- Boris Litvinenko <podstavnoe@gmail.com>  Tue, 12 Mar 2019 14:36:04 +0300
+
 cocaine-http-proxy (0.3.21) unstable; urgency=low
 
   * Refactor: reconnect only touched services during routing groups update
