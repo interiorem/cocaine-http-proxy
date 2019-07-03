@@ -16,7 +16,7 @@ clean::
 	rm -rf target/ build/toolchains/
 
 configure/cocaine-http-proxy::
-	curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
+	curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly-2019-05-23
 
 build/cocaine-http-proxy::
 	cargo build --release --verbose
