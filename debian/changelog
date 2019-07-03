@@ -1,3 +1,9 @@
+cocaine-http-proxy (0.3.24) unstable; urgency=medium
+
+  * changed: tvm1->tvm2
+
+ -- Boris Litvinenko <borislitv@yandex-team.ru>  Wed, 03 Jul 2019 18:31:25 +0300
+
 cocaine-http-proxy (0.3.23) unstable; urgency=medium
 
   * refact: update tokio-core version

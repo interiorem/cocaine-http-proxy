@@ -18,7 +18,7 @@ use cocaine::hpack::RawHeader;
 use cocaine::logging::{Logger, Severity};
 use cocaine::service::Locator;
 use cocaine::service::locator::HashRing;
-use cocaine::service::tvm::{Grant, Tvm};
+use cocaine::service::tvm::Tvm;
 use cocaine::service::unicorn::{Close, Unicorn, Version};
 
 use config::{Config, PoolConfig, ServicePoolConfig};
@@ -483,16 +483,14 @@ pub struct TicketFactory {
     tvm: Tvm,
     client_id: u32,
     client_secret: String,
-    grant: Grant,
 }
 
 impl TicketFactory {
-    pub fn new(tvm: Tvm, client_id: u32, client_secret: String, grant: Grant) -> Self {
+    pub fn new(tvm: Tvm, client_id: u32, client_secret: String) -> Self {
         Self {
             tvm: tvm,
             client_id: client_id,
             client_secret: client_secret,
-            grant: grant,
         }
     }
 }
@@ -503,7 +501,7 @@ impl Factory for TicketFactory {
     type Future = Box<Future<Item = Self::Item, Error = Error> + Send>;
 
     fn create(&mut self) -> Self::Future {
-        box self.tvm.ticket(self.client_id, &self.client_secret, &self.grant)
+        box self.tvm.ticket(self.client_id, &self.client_secret)
     }
 }
 
@@ -551,7 +549,7 @@ where
             let auth = RawHeader::new(
                 // TODO: Use hardcoded names.
                 "authorization".as_bytes(),
-                format!("TVM {}", ticket).into_bytes()
+                format!("TVM2 {}", ticket).into_bytes()
             );
 
             Box::new(unicorn.subscribe(&path, Some(vec![auth])))
