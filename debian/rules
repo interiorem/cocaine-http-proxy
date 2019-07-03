@@ -28,3 +28,7 @@ install/cocaine-http-proxy::
 	install -m755 target/release/cocaine-http-proxy $(DEB_DESTDIR)usr/bin/cocaine-http-proxy
 	install -d $(DEB_DESTDIR)etc/cocaine-http-proxy/
 	install -m644 config.yaml $(DEB_DESTDIR)etc/cocaine-http-proxy/cocaine-http-proxy-default.yaml
+
+override_dh_builddeb:
+	dh_builddeb -- -Zgzip
+

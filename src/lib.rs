@@ -41,7 +41,6 @@ use serde::ser::SerializeMap;
 use cocaine::{Core, ServiceBuilder};
 use cocaine::logging::Severity;
 use cocaine::service::{Locator, Tvm, Unicorn};
-use cocaine::service::tvm::Grant;
 
 pub use self::config::Config;
 use self::logging::Loggers;
@@ -172,8 +171,7 @@ pub fn run(config: Config) -> Result<(), Box<error::Error>> {
             let tm = TicketFactory::new(
                 Tvm::new(tvm),
                 cfg.auth().client_id(),
-                cfg.auth().client_secret().to_owned(),
-                Grant::ClientCredentials
+                cfg.auth().client_secret().to_owned()
             );
 
             let tracing = {
